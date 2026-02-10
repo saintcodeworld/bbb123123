@@ -1,0 +1,137 @@
+.projectinfo
+
+Project Name:
+SkyMine
+
+Short Description:
+Browser-based 3D mining experience inspired by Minecraft visuals. Players spawn in a floating lobby/void environment with clouds, can freely fly, and mine blocks to earn points. User identity is based on auto-generated Solana wallets.
+
+Core Concept:
+- Player signs up → Solana wallet is generated
+- Wallet = user identity
+- Player spawns in a sky/void lobby
+- Player can fly freely (no walking / gravity focus)
+- Blocks spawn in front of the player
+- Player mines blocks using a pickaxe
+- Each block type gives points
+- Simple loop: mine → score → repeat
+
+Platform:
+- Web (desktop first)
+- Runs fully in browser
+
+Tech Stack:
+- Three.js (core 3D rendering)
+- JavaScript / TypeScript
+- WebGL
+- Solana Web3.js (wallet generation)
+- Optional backend (API) for:
+  - Score persistence
+  - Leaderboards
+  - Wallet-based session tracking
+
+User Signup & Identity:
+- On first visit / signup:
+  - A new Solana wallet (keypair) is generated client-side
+  - Public key = user ID
+- User is shown:
+  - Private key / seed phrase
+  - Clear instruction to save it securely
+- No email, no password
+- Relogin = importing private key / seed phrase
+- If private key is lost:
+  - Account is unrecoverable (by design)
+
+Wallet Rules:
+- Wallet is generated locally in browser
+- Private key is never stored on server
+- Server only stores:
+  - Public key
+  - Associated scores / stats
+- Wallet can later be used for:
+  - On-chain rewards
+  - Token distribution
+  - NFT / cosmetic ownership
+
+Visual Style:
+- Minecraft-inspired blocky aesthetic
+- Default Minecraft-style skins
+- Simple voxel blocks (cube-based)
+- Floating environment with:
+  - Skybox
+  - Clouds
+  - Void below
+- Minimal UI (score, wallet address shortened)
+
+Player Controls:
+- First-person or over-the-shoulder camera
+- Free flight movement:
+  - WASD / mouse
+  - No stamina
+  - No fall damage
+- Mouse click to mine block
+- Visual hit / break feedback
+
+Block Types:
+- Stone
+- Iron
+- Grass
+- Diamond
+
+Block Mechanics:
+- Blocks are static cubes
+- Raycasting used to detect mining
+- On break:
+  - Block disappears
+  - Points awarded based on type
+  - Next block spawns in front of player
+- No inventory system (v1)
+
+Points System:
+- Stone: low points
+- Grass: low–medium points
+- Iron: medium points
+- Diamond: high points
+- Score updates in real time
+- Score tied to wallet public key
+
+Environment:
+- Floating spawn point or invisible platform
+- Single block active at a time (v1)
+- Clouds via particles or shader
+- No terrain chunks / no world streaming
+
+Game Loop:
+1. User signs up → Solana wallet generated
+2. Player spawns in sky lobby
+3. Block spawns in front of player
+4. Player mines block
+5. Points awarded to wallet
+6. Next block spawns
+7. Loop continues
+
+Performance Strategy:
+- Instanced meshes for blocks
+- Minimal draw calls
+- Simple geometries & materials
+- No physics engine (manual logic)
+
+Out of Scope (v1):
+- Crafting
+- Survival mechanics
+- Enemies / mobs
+- Inventory
+- Multiplayer
+- Procedural terrain
+- On-chain transactions (optional later)
+
+Future Extensions:
+- On-chain score anchoring
+- Token rewards based on score
+- Wallet-gated cosmetics
+- Leaderboards by wallet
+- Multiplayer mining rooms
+- Daily / timed challenges
+
+Primary Goal:
+Ship a fast, addictive, web-based mining game with wallet-native identity, instant onboarding, and a clean upgrade path to on-chain rewards.

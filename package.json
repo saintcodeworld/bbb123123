@@ -1,0 +1,19 @@
+{
+  "name": "skymine",
+  "version": "1.0.0",
+  "description": "Browser-based 3D mining experience with memecoin token rewards",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.87.6",
+    "bs58": "^6.0.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.12"
+  }
+}

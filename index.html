@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineBlock</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('/fonts/Minecraft.ttf') format('truetype');
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Minecraft', 'Courier New', monospace;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #wallet-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.95);
+      border: 3px solid #4a4a4a;
+      padding: 30px;
+      max-width: 600px;
+      z-index: 200;
+      pointer-events: all;
+      color: #fff;
+    }
+
+    #wallet-modal.hidden {
+      display: none;
+    }
+
+    #wallet-modal h2 {
+      margin-bottom: 20px;
+      color: #00ff00;
+    }
+
+    #wallet-modal button {
+      background: #4a4a4a;
+      color: #fff;
+      border: 2px solid #666;
+      padding: 12px 24px;
+      margin: 10px 5px;
+      cursor: pointer;
+      font-family: 'Minecraft', 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    #wallet-modal button:hover {
+      background: #666;
+    }
+
+    #wallet-modal input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background: #1a1a1a;
+      border: 2px solid #4a4a4a;
+      color: #fff;
+      font-family: 'Minecraft', 'Courier New', monospace;
+    }
+
+    .wallet-key-display {
+      background: #1a1a1a;
+      padding: 15px;
+      border: 2px solid #00ff00;
+      margin: 10px 0;
+      word-break: break-all;
+      line-height: 1.6;
+      font-size: 12px;
+      position: relative;
+    }
+
+    .wallet-key-display .key-label {
+      color: #888;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .wallet-key-display .key-value {
+      color: #00ff00;
+      user-select: all;
+    }
+
+    .private-key-display {
+      border-color: #ff6600 !important;
+    }
+
+    .private-key-display .key-value {
+      color: #ff6600;
+    }
+
+    .warning {
+      color: #ff6600;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: 'Minecraft', 'Courier New', monospace;
+      font-size: 10px;
+    }
+
+    .copy-btn:hover {
+      background: #555;
+    }
+
+    .settings-wallet-section {
+      margin-top: 15px;
+      padding: 12px;
+      background: #111;
+      border: 1px solid #333;
+    }
+
+    .settings-wallet-section .label {
+      color: #888;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .settings-wallet-section .value {
+      font-size: 11px;
+      word-break: break-all;
+      user-select: all;
+      margin-bottom: 10px;
+    }
+
+    .settings-wallet-section .value.public {
+      color: #00ff00;
+    }
+
+    .settings-wallet-section .value.private {
+      color: #ff6600;
+    }
+
+    #hud {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 4px #000;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    #hud div {
+      margin: 8px 0;
+    }
+
+    #connection-status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    #connection-status.connected {
+      background: rgba(0, 128, 0, 0.3);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+    }
+
+    #connection-status.disconnected {
+      background: rgba(128, 0, 0, 0.3);
+      border: 1px solid #ff0000;
+      color: #ff6666;
+    }
+
+    #fly-indicator {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      color: #00ff00;
+      font-size: 14px;
+      text-shadow: 2px 2px 4px #000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    #fly-indicator.active {
+      opacity: 1;
+    }
+
+    #settings-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+    }
+
+    #settings-menu.hidden {
+      display: none;
+    }
+
+    .settings-content {
+      background: #1a1a1a;
+      border: 3px solid #4a4a4a;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      color: #fff;
+    }
+
+    .settings-content h2 {
+      color: #00ff00;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .settings-content h3 {
+      color: #ffff00;
+      margin: 20px 0 10px 0;
+      font-size: 16px;
+    }
+
+    .settings-section {
+      margin: 20px 0;
+    }
+
+    .settings-content label {
+      display: block;
+      margin: 15px 0;
+      cursor: pointer;
+    }
+
+    .settings-content input[type="range"] {
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .settings-content input[type="checkbox"] {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .settings-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .settings-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #666;
+      background: #4a4a4a;
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Minecraft', 'Courier New', monospace;
+    }
+
+    .btn-primary {
+      background: #2a5a2a !important;
+      border-color: #00ff00 !important;
+    }
+
+    .btn-primary:hover {
+      background: #3a7a3a !important;
+    }
+
+    .btn-secondary:hover {
+      background: #666 !important;
+    }
+
+    .controls-info {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    .controls-info p {
+      margin: 5px 0;
+    }
+
+    .settings-info {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #4a4a4a;
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+    }
+
+    .settings-info p {
+      margin: 5px 0;
+    }
+
+    #crosshair {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+
+    #crosshair::before,
+    #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    #crosshair::before {
+      width: 3px;
+      height: 20px;
+      left: 8.5px;
+    }
+
+    #crosshair::after {
+      width: 20px;
+      height: 3px;
+      top: 8.5px;
+    }
+
+    .mining-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    .mining-indicator.active {
+      opacity: 1;
+      animation: pulse 0.3s ease-out;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="ui-overlay">
+    <div id="ca-display"
+      style="position:fixed;top:12px;left:50%;transform:translateX(-50%);color:#ffaa00;font-size:12px;font-family:'Minecraft','Courier New',monospace;text-shadow:2px 2px 4px #000;pointer-events:all;cursor:pointer;z-index:101;background:rgba(0,0,0,0.5);padding:6px 14px;border:1px solid #ffaa0055;user-select:all;">
+      CA : JE14GrmamCQpjLMuDyajGY5SGc25PVedbw5jrdivpump</div>
+    <div id="hud">
+      <div id="score">Tokens: 0</div>
+      <div id="wallet-display">Wallet: Not Connected</div>
+      <div id="block-info" style="color: #ffff00; margin-top: 10px; font-size: 11px;">Stone:50 | Coal:150 | Iron:300 |
+        Gold:600 | Emerald:8000 | Diamond:1000</div>
+      <div id="pickaxe-info" style="color: #aaa; margin-top: 3px; font-size: 12px;">⛏ Stone Pickaxe</div>
+      <div id="break-progress-bar" style="width: 120px; height: 6px; background: #333; margin-top: 5px; display: none;">
+        <div id="break-fill" style="height: 100%; width: 0%; background: #00ff00; transition: width 0.05s;"></div>
+      </div>
+      <div id="fps-counter" style="color: #888; margin-top: 5px; font-size: 11px;">FPS: -- | Chunks: --</div>
+      <div id="position" style="color: #888; margin-top: 2px; font-size: 10px;">X: 0 Y: 0 Z: 0</div>
+      <div id="target-block" style="color: #888; margin-top: 2px; font-size: 10px;">Target: none</div>
+      <div style="margin-top: 8px;"><span id="connection-status" class="disconnected">Offline</span></div>
+    </div>
+
+    <div id="fly-indicator" class="active">✈ FLYING</div>
+
+    <div id="crosshair"></div>
+    <div class="mining-indicator"></div>
+
+    <div id="instructions">
+      WASD - Move | Space - Fly Up | Shift - Fly Down | Hold Click - Mine | E - Inventory | V - Voice Chat | ESC -
+      Settings
+    </div>
+  </div>
+
+  <div id="wallet-modal">
+    <h2>Welcome to MineBlock</h2>
+    <div id="wallet-setup">
+      <p>Create your unique Solana wallet to start mining and earning tokens:</p>
+      <button id="create-wallet-btn">Create Account</button>
+
+      <div id="new-wallet-display" style="display: none;">
+        <p class="warning">⚠️ SAVE YOUR PRIVATE KEY - YOU NEED IT TO ACCESS YOUR FUNDS!</p>
+        <div class="wallet-key-display">
+          <div class="key-label">Your Wallet Address:</div>
+          <div class="key-value" id="wallet-address-display"></div>
+          <button class="copy-btn"
+            onclick="navigator.clipboard.writeText(document.getElementById('wallet-address-display').textContent)">Copy</button>
+        </div>
+        <div class="wallet-key-display private-key-display">
+          <div class="key-label">Your Private Key (keep secret!):</div>
+          <div class="key-value" id="private-key-display"></div>
+          <button class="copy-btn"
+            onclick="navigator.clipboard.writeText(document.getElementById('private-key-display').textContent)">Copy</button>
+        </div>
+        <button id="continue-btn">Continue to Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
