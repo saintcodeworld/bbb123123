@@ -50,20 +50,19 @@ export class SettingsMenu {
               <div class="value public" id="settings-wallet-address">Not connected</div>
               <div class="label">Private Key:</div>
               <div class="value private" id="settings-private-key" style="cursor:pointer;" title="Click to reveal">●●●●●●●●●●●●●●●●</div>
-              <button id="toggle-private-key-btn" style="background:#333;color:#fff;border:1px solid #666;padding:4px 12px;cursor:pointer;font-family:'Minecraft','Courier New',monospace;font-size:10px;margin-top:4px;">Show Private Key</button>
-              <button id="copy-private-key-btn" style="background:#333;color:#fff;border:1px solid #666;padding:4px 12px;cursor:pointer;font-family:'Minecraft','Courier New',monospace;font-size:10px;margin-top:4px;margin-left:4px;">Copy</button>
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <button id="toggle-private-key-btn" class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:11px;">Show Private Key</button>
+                <button id="copy-private-key-btn" class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:11px;">Copy</button>
+              </div>
             </div>
           </div>
 
           <div class="settings-section">
             <h3>Controls</h3>
             <div class="controls-info">
-              <p>WASD - Fly</p>
-              <p>Mouse - Look</p>
-              <p>Space - Fly Up</p>
-              <p>Shift - Fly Down</p>
-              <p>Left Click - Mine</p>
-              <p>ESC - Settings Menu</p>
+              <p>WASD - Fly • Mouse - Look</p>
+              <p>Space - Fly Up • Shift - Fly Down</p>
+              <p>Left Click - Mine • ESC - Settings Menu</p>
             </div>
           </div>
           

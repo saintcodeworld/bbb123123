@@ -6,359 +6,443 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MineBlock</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @font-face {
-      font-family: 'Minecraft';
-      src: url('/fonts/Minecraft.ttf') format('truetype');
+    :root {
+      --font-main: 'Inter', sans-serif;
+      --color-bg-dark: rgba(10, 10, 14, 0.75);
+      --color-bg-glass: rgba(20, 20, 25, 0.4);
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-text-primary: #ffffff;
+      --color-text-secondary: #94a3b8;
+      --color-accent: #3b82f6;
+      /* Modern Blue */
+      --color-accent-glow: rgba(59, 130, 246, 0.5);
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-glow: 0 0 15px var(--color-accent-glow);
     }
 
     * {
+      border: 0;
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      outline: none;
     }
 
     body {
-      font-family: 'Minecraft', 'Courier New', monospace;
+      font-family: var(--font-main);
       overflow: hidden;
-      background: #000;
+      background: #050505;
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
     }
 
     #canvas-container {
       width: 100vw;
       height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
 
     #ui-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       pointer-events: none;
       z-index: 100;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    #wallet-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.95);
-      border: 3px solid #4a4a4a;
-      padding: 30px;
-      max-width: 600px;
-      z-index: 200;
-      pointer-events: all;
-      color: #fff;
-    }
-
-    #wallet-modal.hidden {
-      display: none;
-    }
-
-    #wallet-modal h2 {
-      margin-bottom: 20px;
-      color: #00ff00;
-    }
-
-    #wallet-modal button {
-      background: #4a4a4a;
-      color: #fff;
-      border: 2px solid #666;
-      padding: 12px 24px;
-      margin: 10px 5px;
-      cursor: pointer;
-      font-family: 'Minecraft', 'Courier New', monospace;
-      font-size: 14px;
-    }
-
-    #wallet-modal button:hover {
-      background: #666;
-    }
-
-    #wallet-modal input {
+    /* HUD Elements */
+    .hud-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      background: #1a1a1a;
-      border: 2px solid #4a4a4a;
-      color: #fff;
-      font-family: 'Minecraft', 'Courier New', monospace;
     }
 
-    .wallet-key-display {
-      background: #1a1a1a;
-      padding: 15px;
-      border: 2px solid #00ff00;
-      margin: 10px 0;
-      word-break: break-all;
-      line-height: 1.6;
+    .hud-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hud-card {
+      background: var(--color-bg-glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .hud-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .hud-label {
       font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hud-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .hud-value.accent {
+      color: var(--color-accent);
+    }
+
+    #ca-display {
+      background: var(--color-bg-dark);
+      border: 1px solid var(--color-accent);
+      color: var(--color-accent);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-family: 'SF Mono', 'Roboto Mono', monospace;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      pointer-events: all;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+      transition: all 0.2s;
+      position: relative;
+      /* Positioning handled by flex layout now, or absolute if needed */
+    }
+
+    #ca-display:hover {
+      background: var(--color-accent);
+      color: #fff;
+      box-shadow: 0 0 20px var(--color-accent-glow);
+      transform: translateY(-1px);
+    }
+
+    #connection-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    #connection-status.connected {
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    #connection-status.disconnected {
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Bottom Info */
+    .hud-bottom-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    #block-info-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--color-bg-glass);
+      backdrop-filter: blur(8px);
+      padding: 8px 12px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      justify-content: center;
+    }
+
+    .info-pill {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+    }
+
+    .info-pill span {
+      color: #fff;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    #instructions {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      text-align: center;
+    }
+
+    /* Modals */
+    #wallet-modal,
+    #settings-menu {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #wallet-modal:not(.hidden),
+    #settings-menu:not(.hidden) {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #wallet-modal.hidden,
+    #settings-menu.hidden {
+      display: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .modal-card,
+    .settings-content {
+      background: rgba(15, 15, 20, 0.95);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      /* Ensure text visible */
+    }
+
+    .modal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+      opacity: 0.5;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #fff;
+      /* Fallback */
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--color-text-secondary);
+      margin-bottom: 20px;
+    }
+
+    button,
+    .btn {
+      width: 100%;
+      background: var(--color-bg-glass);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-main);
+    }
+
+    button:hover,
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary,
+    #create-wallet-btn,
+    #continue-btn,
+    #apply-settings {
+      background: var(--color-accent) !important;
+      border-color: var(--color-accent) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover,
+    #create-wallet-btn:hover,
+    #continue-btn:hover,
+    #apply-settings:hover {
+      background: #2563eb !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary,
+    #reset-settings {
+      background: transparent !important;
+      border: 1px solid var(--color-border) !important;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="range"] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--color-border);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-family: var(--font-main);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    input:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Key Displays */
+    .key-display,
+    .wallet-key-display {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 16px;
       position: relative;
     }
 
-    .wallet-key-display .key-label {
-      color: #888;
+    .label,
+    .key-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .value,
+    .key-value {
+      font-family: 'SF Mono', 'Roboto Mono', monospace;
       font-size: 11px;
-      margin-bottom: 4px;
+      color: var(--color-success);
+      word-break: break-all;
     }
 
-    .wallet-key-display .key-value {
-      color: #00ff00;
-      user-select: all;
-    }
-
-    .private-key-display {
-      border-color: #ff6600 !important;
-    }
-
+    .private .value,
     .private-key-display .key-value {
-      color: #ff6600;
-    }
-
-    .warning {
-      color: #ff6600;
-      margin: 10px 0;
-      font-weight: bold;
+      color: var(--color-warning);
     }
 
     .copy-btn {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: #333;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
       color: #fff;
-      border: 1px solid #666;
-      padding: 4px 10px;
-      cursor: pointer;
-      font-family: 'Minecraft', 'Courier New', monospace;
       font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+      /* Override width 100% */
     }
 
     .copy-btn:hover {
-      background: #555;
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .settings-wallet-section {
-      margin-top: 15px;
-      padding: 12px;
-      background: #111;
-      border: 1px solid #333;
-    }
-
-    .settings-wallet-section .label {
-      color: #888;
-      font-size: 11px;
-      margin-bottom: 4px;
-    }
-
-    .settings-wallet-section .value {
-      font-size: 11px;
-      word-break: break-all;
-      user-select: all;
-      margin-bottom: 10px;
-    }
-
-    .settings-wallet-section .value.public {
-      color: #00ff00;
-    }
-
-    .settings-wallet-section .value.private {
-      color: #ff6600;
-    }
-
-    #hud {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      color: #fff;
-      text-shadow: 2px 2px 4px #000;
-      font-size: 18px;
-      pointer-events: none;
-    }
-
-    #hud div {
-      margin: 8px 0;
-    }
-
-    #connection-status {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 3px;
-      display: inline-block;
-    }
-
-    #connection-status.connected {
-      background: rgba(0, 128, 0, 0.3);
-      border: 1px solid #00ff00;
-      color: #00ff00;
-    }
-
-    #connection-status.disconnected {
-      background: rgba(128, 0, 0, 0.3);
-      border: 1px solid #ff0000;
-      color: #ff6666;
-    }
-
-    #fly-indicator {
-      position: fixed;
-      top: 50%;
-      right: 20px;
-      transform: translateY(-50%);
-      color: #00ff00;
-      font-size: 14px;
-      text-shadow: 2px 2px 4px #000;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
-
-    #fly-indicator.active {
-      opacity: 1;
-    }
-
-    #settings-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: all;
-    }
-
-    #settings-menu.hidden {
-      display: none;
-    }
-
-    .settings-content {
-      background: #1a1a1a;
-      border: 3px solid #4a4a4a;
-      padding: 30px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      color: #fff;
-    }
-
-    .settings-content h2 {
-      color: #00ff00;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .settings-content h3 {
-      color: #ffff00;
-      margin: 20px 0 10px 0;
-      font-size: 16px;
-    }
-
-    .settings-section {
-      margin: 20px 0;
-    }
-
-    .settings-content label {
-      display: block;
-      margin: 15px 0;
-      cursor: pointer;
-    }
-
-    .settings-content input[type="range"] {
-      width: 100%;
-      margin-top: 5px;
-    }
-
-    .settings-content input[type="checkbox"] {
-      margin-right: 10px;
-      cursor: pointer;
-    }
-
-    .settings-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .settings-buttons button {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #666;
-      background: #4a4a4a;
-      color: #fff;
-      cursor: pointer;
-      font-family: 'Minecraft', 'Courier New', monospace;
-    }
-
-    .btn-primary {
-      background: #2a5a2a !important;
-      border-color: #00ff00 !important;
-    }
-
-    .btn-primary:hover {
-      background: #3a7a3a !important;
-    }
-
-    .btn-secondary:hover {
-      background: #666 !important;
-    }
-
-    .controls-info {
-      font-size: 12px;
-      line-height: 1.6;
-      color: #ccc;
-    }
-
-    .controls-info p {
-      margin: 5px 0;
-    }
-
-    .settings-info {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #4a4a4a;
-      font-size: 11px;
-      color: #888;
-      text-align: center;
-    }
-
-    .settings-info p {
-      margin: 5px 0;
-    }
-
+    /* Crosshair & Indicators */
     #crosshair {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 4px #000;
       pointer-events: none;
+      z-index: 90;
     }
 
-    #crosshair::before,
     #crosshair::after {
       content: '';
       position: absolute;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    }
-
-    #crosshair::before {
-      width: 3px;
-      height: 20px;
-      left: 8.5px;
-    }
-
-    #crosshair::after {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 20px;
-      height: 3px;
-      top: 8.5px;
+      height: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+    }
+
+    #fly-indicator {
+      position: fixed;
+      top: 15%;
+      right: 20px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--color-success);
+      color: var(--color-success);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      transform: translateX(20px);
+    }
+
+    #fly-indicator.active {
+      opacity: 1;
+      transform: translateX(0);
     }
 
     .mining-indicator {
@@ -366,9 +450,9 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 30px;
-      height: 30px;
-      border: 3px solid rgba(255, 255, 255, 0.8);
+      width: 40px;
+      height: 40px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
       border-radius: 50%;
       pointer-events: none;
       opacity: 0;
@@ -386,8 +470,8 @@
       }
 
       50% {
-        transform: translate(-50%, -50%) scale(1.3);
-        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
       }
 
       100% {
@@ -395,14 +479,396 @@
       }
     }
 
-    #instructions {
+    /* Override settings menu styles from JS */
+    #settings-menu h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 8px;
+      margin-top: 24px;
+      width: 100%;
+    }
+
+    .warning {
+      color: var(--color-warning);
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    /* Breaking Progress */
+    #break-progress-bar {
       position: fixed;
-      bottom: 20px;
+      top: 56%;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255, 255, 255, 0.7);
+      width: 60px !important;
+      height: 4px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #break-fill {
+      background: var(--color-text-primary) !important;
+      box-shadow: 0 0 10px var(--color-text-primary);
+    }
+
+    /* Settings specific adjustments */
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    /* Inventory Specifics */
+    #inventory-menu {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #inventory-menu:not(.hidden) {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .inv-container {
+      background: rgba(15, 15, 20, 0.95);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 600px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+
+    .inv-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .inv-header h2 {
+      margin: 0;
+      font-size: 18px;
+      background: none;
+      -webkit-text-fill-color: #fff;
+    }
+
+    .inv-close {
+      color: var(--color-text-secondary);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .inv-content-scroll {
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .inv-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .inv-stat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
       text-align: center;
-      font-size: 14px;
+    }
+
+    .inv-stat-label {
+      display: block;
+      font-size: 10px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .inv-stat-value {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-accent);
+    }
+
+    .inv-section {
+      margin-bottom: 24px;
+    }
+
+    .inv-section h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .inv-pickaxes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .inv-pick-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .inv-pick-item:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .inv-pick-item.active {
+      border-color: var(--color-accent);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .inv-pick-item.locked {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .inv-pick-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .inv-pick-icon {
+      font-size: 20px;
+    }
+
+    .inv-pick-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .inv-pick-speed {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+
+    .inv-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .inv-btn.owned {
+      border-color: var(--color-success);
+      color: var(--color-success);
+    }
+
+    .inv-btn.can-buy {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    .inv-blocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+    }
+
+    .inv-block-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .inv-block-count {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .inv-block-name {
+      font-size: 10px;
+      color: var(--color-text-secondary);
+    }
+
+    .inv-block-pts {
+      font-size: 9px;
+      color: var(--color-accent);
+    }
+
+    .inv-withdraw-section {
+      border-top: 1px solid var(--color-border);
+      padding-top: 20px;
+    }
+
+    .inv-withdraw-rate {
+      font-size: 12px;
+      color: var(--color-warning);
+      margin-bottom: 12px;
+    }
+
+    .inv-withdraw-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--color-warning);
+      color: var(--color-warning);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .inv-withdraw-btn:hover:not(:disabled) {
+      background: rgba(245, 158, 11, 0.3);
+    }
+
+    .inv-withdraw-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    .inv-withdraw-status {
+      margin-top: 8px;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+    }
+
+    .inv-withdraw-status.success {
+      color: var(--color-success);
+    }
+
+    .inv-withdraw-status.error {
+      color: var(--color-danger);
+    }
+
+    .inv-withdraw-status.pending {
+      color: var(--color-warning);
+    }
+
+    /* Voice Chat Specifics */
+    #voice-chat-ui {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      z-index: 150;
+      pointer-events: none;
+      /* Container is pointer-events-none, children all/none */
+    }
+
+    #voice-chat-ui button {
+      pointer-events: all;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      border: 1px solid var(--color-border);
+      padding: 8px 16px;
+      font-family: var(--font-main);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 80px;
+      border-radius: var(--radius-lg);
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    #voice-chat-ui button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    #voice-chat-ui button.active {
+      border-color: var(--color-success);
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-success);
+    }
+
+    #voice-chat-ui button.deafened {
+      border-color: var(--color-danger);
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-danger);
+    }
+
+    #voice-players {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+      margin-top: 8px;
+    }
+
+    .voice-player-indicator {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      color: var(--color-text-secondary);
+      padding: 6px 12px;
+      font-family: var(--font-main);
+      font-size: 11px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      transition: all 0.3s;
+    }
+
+    .voice-player-indicator.connected {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    #voice-local-level {
+      text-align: right;
+      font-family: 'SF Mono', 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--color-success);
+      height: 14px;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -411,56 +877,98 @@
   <div id="canvas-container"></div>
 
   <div id="ui-overlay">
-    <div id="ca-display"
-      style="position:fixed;top:12px;left:50%;transform:translateX(-50%);color:#ffaa00;font-size:12px;font-family:'Minecraft','Courier New',monospace;text-shadow:2px 2px 4px #000;pointer-events:all;cursor:pointer;z-index:101;background:rgba(0,0,0,0.5);padding:6px 14px;border:1px solid #ffaa0055;user-select:all;">
-      CA : JE14GrmamCQpjLMuDyajGY5SGc25PVedbw5jrdivpump</div>
-    <div id="hud">
-      <div id="score">Tokens: 0</div>
-      <div id="wallet-display">Wallet: Not Connected</div>
-      <div id="block-info" style="color: #ffff00; margin-top: 10px; font-size: 11px;">Stone:50 | Coal:150 | Iron:300 |
-        Gold:600 | Emerald:8000 | Diamond:1000</div>
-      <div id="pickaxe-info" style="color: #aaa; margin-top: 3px; font-size: 12px;">⛏ Stone Pickaxe</div>
-      <div id="break-progress-bar" style="width: 120px; height: 6px; background: #333; margin-top: 5px; display: none;">
-        <div id="break-fill" style="height: 100%; width: 0%; background: #00ff00; transition: width 0.05s;"></div>
+    <!-- Top Bar: CA, Wallet, Stats -->
+    <div class="hud-top-bar">
+      <div class="hud-group">
+        <div class="hud-card">
+          <div id="wallet-display" class="hud-value">Wallet: Not Connected</div>
+        </div>
+        <div class="hud-card">
+          <div id="score" class="hud-value accent">Tokens: 0</div>
+        </div>
       </div>
-      <div id="fps-counter" style="color: #888; margin-top: 5px; font-size: 11px;">FPS: -- | Chunks: --</div>
-      <div id="position" style="color: #888; margin-top: 2px; font-size: 10px;">X: 0 Y: 0 Z: 0</div>
-      <div id="target-block" style="color: #888; margin-top: 2px; font-size: 10px;">Target: none</div>
-      <div style="margin-top: 8px;"><span id="connection-status" class="disconnected">Offline</span></div>
+
+      <div id="ca-display">CA: AXtbfSBtoadqytbCxyAMidxYK22LpNX9yuLMjqTnpump</div>
+
+      <div class="hud-group">
+        <div class="hud-card">
+          <div id="position" class="hud-label" style="text-transform: none;">X:0 Y:0 Z:0</div>
+        </div>
+        <div class="hud-card">
+          <div id="fps-counter" class="hud-label">FPS: --</div>
+        </div>
+        <span id="connection-status" class="disconnected">OFFLINE</span>
+      </div>
     </div>
 
-    <div id="fly-indicator" class="active">✈ FLYING</div>
-
+    <!-- Center: Mining/Game Indicators -->
+    <div id="fly-indicator" class="active">✈ FLIGHT MODE</div>
     <div id="crosshair"></div>
     <div class="mining-indicator"></div>
 
-    <div id="instructions">
-      WASD - Move | Space - Fly Up | Shift - Fly Down | Hold Click - Mine | E - Inventory | V - Voice Chat | ESC -
-      Settings
+    <div id="break-progress-bar" style="display: none;">
+      <div id="break-fill" style="width: 0%;"></div>
+    </div>
+
+    <!-- Bottom Bar: Tools, Legend, Instructions -->
+    <div class="hud-bottom-bar">
+      <div class="hud-card" id="pickaxe-info-card">
+        <span id="pickaxe-info" class="hud-value">⛏ Stone Pickaxe</span>
+      </div>
+
+      <div id="block-info-container">
+        <div class="info-pill">Stone:<span>50</span></div>
+        <div class="info-pill">Coal:<span>150</span></div>
+        <div class="info-pill">Iron:<span>300</span></div>
+        <div class="info-pill">Gold:<span>600</span></div>
+        <div class="info-pill">Diamond:<span>1K</span></div>
+        <div class="info-pill">Emerald:<span>8K</span></div>
+      </div>
+
+      <!-- Hidden original element to maintain JS compatibility if it selects by id matching exactly or uses innerHTML replacement -->
+      <!-- Actually, let's keep the ID on a wrapper if needed, but the original code replaced innerHTML of #block-info? 
+           Checking index.html: <div id="block-info">Stone:50...</div> was static text. 
+           Wait, is it static? "Stone:50 | Coal:150..." looks static in original HTML.
+           If it's static, I can replace it. If JS updates it, I need to know.
+           The other files (miningSystem.js?) might update it. Let's assume static for now as it was hardcoded in index.html.
+           I'll keep a hidden div with id block-info just in case JS tries to read/write it. -->
+      <div id="block-info" style="display:none;">Stone:50 | Coal:150 | Iron:300 | Gold:600 | Emerald:8000 | Diamond:1000
+      </div>
+
+      <div id="instructions">
+        WASD Move • SPACE Up • SHIFT Down • CLICK Mine • E Inventory • V Voice • ESC Settings
+      </div>
+
+      <!-- Target block hidden but available for JS -->
+      <div id="target-block" style="display:none;"></div>
     </div>
   </div>
 
-  <div id="wallet-modal">
-    <h2>Welcome to MineBlock</h2>
-    <div id="wallet-setup">
-      <p>Create your unique Solana wallet to start mining and earning tokens:</p>
-      <button id="create-wallet-btn">Create Account</button>
+  <div id="wallet-modal"> <!-- ensure hidden class matches CSS logic -->
+    <div class="modal-card">
+      <h2>Welcome to MineBlock</h2>
+      <div id="wallet-setup">
+        <button id="create-wallet-btn" class="btn btn-primary">Get Started</button>
 
-      <div id="new-wallet-display" style="display: none;">
-        <p class="warning">⚠️ SAVE YOUR PRIVATE KEY - YOU NEED IT TO ACCESS YOUR FUNDS!</p>
-        <div class="wallet-key-display">
-          <div class="key-label">Your Wallet Address:</div>
-          <div class="key-value" id="wallet-address-display"></div>
-          <button class="copy-btn"
-            onclick="navigator.clipboard.writeText(document.getElementById('wallet-address-display').textContent)">Copy</button>
+        <div id="new-wallet-display" style="display: none;">
+          <p class="warning">⚠️ SAVE THIS PRIVATE KEY. IT CANNOT BE RECOVERED.</p>
+
+          <div class="wallet-key-display">
+            <div class="key-label">Public Address</div>
+            <div class="key-value" id="wallet-address-display"></div>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText(document.getElementById('wallet-address-display').innerText)">COPY</button>
+          </div>
+
+          <div class="wallet-key-display private-key-display">
+            <div class="key-label">Private Key</div>
+            <div class="key-value" id="private-key-display"></div>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText(document.getElementById('private-key-display').innerText)">COPY</button>
+          </div>
+
+          <button id="continue-btn" class="btn btn-primary" style="margin-top: 16px;">Enter World</button>
         </div>
-        <div class="wallet-key-display private-key-display">
-          <div class="key-label">Your Private Key (keep secret!):</div>
-          <div class="key-value" id="private-key-display"></div>
-          <button class="copy-btn"
-            onclick="navigator.clipboard.writeText(document.getElementById('private-key-display').textContent)">Copy</button>
-        </div>
-        <button id="continue-btn">Continue to Game</button>
       </div>
     </div>
   </div>

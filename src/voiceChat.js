@@ -35,59 +35,14 @@ export class VoiceChat {
     const container = document.createElement('div');
     container.id = 'voice-chat-ui';
     container.innerHTML = `
-      <button id="voice-toggle" title="Toggle Microphone (V)">🎤 ON</button>
-      <button id="voice-deafen" title="Toggle Deafen (B)">🔊</button>
-      <div id="voice-local-level" style="color:#0f0;font-size:10px;font-family:monospace;"></div>
+      <div id="voice-local-level"></div>
+      <div style="display:flex; gap:8px;">
+        <button id="voice-toggle" title="Toggle Microphone (V)">MIC ON</button>
+        <button id="voice-deafen" title="Toggle Deafen (B)">AUDIO ON</button>
+      </div>
       <div id="voice-players"></div>
     `;
     document.body.appendChild(container);
-
-    const style = document.createElement('style');
-    style.textContent = `
-      #voice-chat-ui {
-        position: fixed;
-        bottom: 60px;
-        right: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 6px;
-        z-index: 150;
-        pointer-events: all;
-      }
-      #voice-chat-ui button {
-        background: rgba(0, 0, 0, 0.7);
-        color: #fff;
-        border: 2px solid #555;
-        padding: 8px 14px;
-        font-family: 'Minecraft', 'Courier New', monospace;
-        font-size: 12px;
-        cursor: pointer;
-        min-width: 80px;
-      }
-      #voice-chat-ui button:hover { border-color: #888; }
-      #voice-chat-ui button.active { border-color: #0f0; background: rgba(0, 80, 0, 0.7); }
-      #voice-chat-ui button.deafened { border-color: #f00; background: rgba(80, 0, 0, 0.7); }
-      #voice-players {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        align-items: flex-end;
-      }
-      .voice-player-indicator {
-        background: rgba(0, 0, 0, 0.6);
-        color: #aaa;
-        padding: 3px 8px;
-        font-family: 'Minecraft', 'Courier New', monospace;
-        font-size: 10px;
-        border: 1px solid #333;
-      }
-      .voice-player-indicator.connected {
-        color: #0f0;
-        border-color: #0f0;
-      }
-    `;
-    document.head.appendChild(style);
 
     document.getElementById('voice-toggle').addEventListener('click', () => this.toggleMute());
     document.getElementById('voice-deafen').addEventListener('click', () => this.toggleDeafen());
@@ -567,7 +522,7 @@ export class VoiceChat {
               lines.push(`    OUTBOUND RTP: bytesSent=${report.bytesSent} packetsSent=${report.packetsSent}`);
             }
           });
-        } catch (e) {}
+        } catch (e) { }
 
         const analyser = this.analysers.get(peerId);
         if (analyser) {
