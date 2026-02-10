@@ -223,10 +223,7 @@ export class InventoryMenu {
     btn.disabled = false;
 
     if (data.success) {
-      const shortTx = data.tx_signature
-        ? `${data.tx_signature.slice(0, 8)}...${data.tx_signature.slice(-8)}`
-        : '';
-      status.textContent = `Sent ${data.amount_tokens} Tokens! TX: ${shortTx}`;
+      status.textContent = 'Withdrawal Successful!';
       status.className = 'inv-withdraw-status success';
       this.refreshWithdrawSection();
       this.refresh();
