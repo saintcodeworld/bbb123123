@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'blockmine_save';
+const STORAGE_KEY = 'ore_mine_save';
 
 export function createDefaultState() {
   return {

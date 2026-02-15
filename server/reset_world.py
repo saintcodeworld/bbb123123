@@ -8,7 +8,7 @@ def reset_world():
         print("Cancelled.")
         return
     
-    conn = sqlite3.connect('blockmine.db')
+    conn = sqlite3.connect('ore_mine.db')
     cursor = conn.cursor()
     
     cursor.execute("DELETE FROM broken_blocks")
@@ -25,5 +25,5 @@ if __name__ == "__main__":
         reset_world()
     except Exception as e:
         print(f"❌ Error: {e}")
-        print("Make sure blockmine.db exists (run server first)")
+        print("Make sure ore_mine.db exists (run server first)")
 

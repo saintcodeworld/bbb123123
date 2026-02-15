@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 class Database:
-    def __init__(self, db_path='blockmine.db'):
+    def __init__(self, db_path='ore_mine.db'):
         self.db_path = db_path
         self.db = None
 

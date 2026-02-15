@@ -11,7 +11,7 @@ MULTIPLAYER SERVER SETUP
    python server.py
 
 The server will start on ws://0.0.0.0:8765
-Database will be created automatically (blockmine.db)
+Database will be created automatically (ore_mine.db)
 
 The client will automatically connect when the game starts.
 
@@ -29,7 +29,7 @@ FEATURES:
 - Automatic reconnection on disconnect
 
 DATABASE:
-- blockmine.db stores:
+- ore_mine.db stores:
   * Player data (wallet, username, scores, stats)
   * Broken blocks (shared across all players)
   * Player last seen timestamps
