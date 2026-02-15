@@ -1,5 +1,5 @@
 @echo off
-echo Starting BlockMine Multiplayer Server...
+echo Starting Ore Miner Multiplayer Server...
 echo.
 python server.py
 pause

@@ -375,7 +375,7 @@ async def main():
     server = GameServer(db)
     
     print("=" * 50)
-    print("BlockMine Multiplayer Server")
+    print("Ore Miner Multiplayer Server")
     print("=" * 50)
     print(f"World Seed: {WORLD_SEED}")
     print(f"Treasury configured: {'Yes' if TREASURY_PRIVATE_KEY else 'No'}")
