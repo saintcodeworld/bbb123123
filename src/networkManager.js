@@ -14,7 +14,7 @@ export class NetworkManager {
     this.isInitialized = false;
   }
 
-  connect(url = 'wss://flaky-leeanna-baptismally.ngrok-free.dev') {
+  connect(url = 'wss://mineblock.ngrok.app') {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       return;
     }
