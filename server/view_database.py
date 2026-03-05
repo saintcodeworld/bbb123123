@@ -10,7 +10,7 @@ def view_database():
     cursor = conn.cursor()
     
     print("=" * 60)
-    print("Ore Miner Database Viewer")
+    print("BLOCK MINER Database Viewer")
     print("=" * 60)
     
     cursor.execute("SELECT COUNT(*) FROM players")
